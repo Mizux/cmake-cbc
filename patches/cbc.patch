@@ -1,0 +1,587 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..6971b17
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,10 @@
++cmake_minimum_required(VERSION 3.0.2)
++project(Cbc VERSION 2.9.9 LANGUAGES CXX)
++
++include(CTest)
++
++add_subdirectory(CoinUtils)
++add_subdirectory(Osi)
++add_subdirectory(Clp)
++add_subdirectory(Cgl)
++add_subdirectory(Cbc)
+diff --git a/Cbc/CMakeLists.txt b/Cbc/CMakeLists.txt
+new file mode 100644
+index 0000000..b489b04
+--- /dev/null
++++ b/Cbc/CMakeLists.txt
+@@ -0,0 +1,173 @@
++find_package(CoinUtils)
++find_package(ZLIB)
++
++set(_SRCS
++	#src/CbcBranchBase.cpp
++	src/Cbc_C_Interface.cpp
++	src/CbcBranchAllDifferent.cpp
++	src/CbcBranchCut.cpp
++	src/CbcBranchDecision.cpp
++	src/CbcBranchDefaultDecision.cpp
++	src/CbcBranchDynamic.cpp
++	src/CbcBranchingObject.cpp
++	src/CbcBranchLotsize.cpp
++	src/CbcBranchToFixLots.cpp
++	src/CbcCbcParam.cpp
++	src/CbcClique.cpp
++	src/CbcCompareDefault.cpp
++	src/CbcCompareDepth.cpp
++	src/CbcCompareEstimate.cpp
++	src/CbcCompareObjective.cpp
++	src/CbcConsequence.cpp
++	src/CbcCountRowCut.cpp
++	src/CbcCutGenerator.cpp
++	src/CbcCutModifier.cpp
++	src/CbcCutSubsetModifier.cpp
++	src/CbcDummyBranchingObject.cpp
++	src/CbcEventHandler.cpp
++	src/CbcFathom.cpp
++	src/CbcFathomDynamicProgramming.cpp
++	src/CbcFixVariable.cpp
++	src/CbcFollowOn.cpp
++	src/CbcFullNodeInfo.cpp
++	src/CbcGenBaB.cpp
++	src/CbcGenCbcParam.cpp
++	src/CbcGenCbcParamUtils.cpp
++	src/CbcGenCtlBlk.cpp
++	src/CbcGeneral.cpp
++	src/CbcGeneralDepth.cpp
++	src/CbcGenMessages.cpp
++	src/CbcGenOsiParam.cpp
++	src/CbcGenOsiParamUtils.cpp
++	src/CbcGenParam.cpp
++	src/CbcGenParamUtils.cpp
++	src/CbcGenSolution.cpp
++	src/CbcGenSolvers.cpp
++	src/CbcHeuristic.cpp
++	src/CbcHeuristicDINS.cpp
++	src/CbcHeuristicDiveCoefficient.cpp
++	src/CbcHeuristicDive.cpp
++	src/CbcHeuristicDiveFractional.cpp
++	src/CbcHeuristicDiveGuided.cpp
++	src/CbcHeuristicDiveLineSearch.cpp
++	src/CbcHeuristicDivePseudoCost.cpp
++	src/CbcHeuristicDiveVectorLength.cpp
++	src/CbcHeuristicDW.cpp
++	src/CbcHeuristicFPump.cpp
++	src/CbcHeuristicGreedy.cpp
++	src/CbcHeuristicLocal.cpp
++	src/CbcHeuristicPivotAndFix.cpp
++	src/CbcHeuristicRandRound.cpp
++	src/CbcHeuristicRENS.cpp
++	src/CbcHeuristicRINS.cpp
++	src/CbcHeuristicVND.cpp
++	src/CbcLinked.cpp
++	src/CbcLinkedUtils.cpp
++	src/CbcMessage.cpp
++	src/CbcMipStartIO.cpp
++	src/CbcModel.cpp
++	src/CbcNode.cpp
++	src/CbcNodeInfo.cpp
++	src/CbcNWay.cpp
++	src/CbcObject.cpp
++	src/CbcObjectUpdateData.cpp
++	src/CbcParam.cpp
++	src/CbcPartialNodeInfo.cpp
++	src/CbcSimpleInteger.cpp
++	src/CbcSimpleIntegerDynamicPseudoCost.cpp
++	src/CbcSimpleIntegerPseudoCost.cpp
++	src/CbcSolverAnalyze.cpp
++	src/CbcSolver.cpp
++	src/CbcSolverExpandKnapsack.cpp
++	src/CbcSolverHeuristics.cpp
++	src/CbcSOS.cpp
++	src/CbcStatistics.cpp
++	src/CbcStrategy.cpp
++	src/CbcSubProblem.cpp
++	src/CbcThread.cpp
++	src/CbcTree.cpp
++	src/CbcTreeLocal.cpp
++	src/unitTestClp.cpp)
++
++set(_HDRS
++	src/Cbc_C_Interface.h
++	src/CbcBranchActual.hpp
++	src/CbcBranchAllDifferent.hpp
++	src/CbcBranchBase.hpp
++	src/CbcBranchDynamic.hpp
++	src/CbcBranchCut.hpp
++	src/CbcBranchDecision.hpp
++	src/CbcBranchDefaultDecision.hpp
++	src/CbcBranchingObject.hpp
++	src/CbcBranchLotsize.hpp
++	src/CbcBranchToFixLots.hpp
++	src/CbcCompareActual.hpp
++	src/CbcCompareBase.hpp
++	src/CbcCompareDefault.hpp
++	src/CbcCompareDepth.hpp
++	src/CbcCompareEstimate.hpp
++	src/CbcCompareObjective.hpp
++	src/CbcConsequence.hpp
++	src/CbcClique.hpp
++	src/CbcCompare.hpp
++	src/CbcCountRowCut.hpp
++	src/CbcCutGenerator.hpp
++	src/CbcCutModifier.hpp
++	src/CbcCutSubsetModifier.hpp
++	src/CbcDummyBranchingObject.hpp
++	src/CbcFathom.hpp
++	src/CbcEventHandler.hpp
++	src/CbcFathomDynamicProgramming.hpp
++	src/CbcFeasibilityBase.hpp
++	src/CbcFixVariable.hpp
++	src/CbcFollowOn.hpp
++	src/CbcFullNodeInfo.hpp
++	src/CbcGeneral.hpp
++	src/CbcGeneralDepth.hpp
++	src/CbcHeuristic.hpp
++	src/CbcHeuristicDINS.hpp
++	src/CbcHeuristicDive.hpp
++	src/CbcHeuristicDiveCoefficient.hpp
++	src/CbcHeuristicDiveFractional.hpp
++	src/CbcHeuristicDiveGuided.hpp
++	src/CbcHeuristicDiveLineSearch.hpp
++	src/CbcHeuristicDivePseudoCost.hpp
++	src/CbcHeuristicDiveVectorLength.hpp
++	src/CbcHeuristicDW.hpp
++	src/CbcHeuristicFPump.hpp
++	src/CbcHeuristicGreedy.hpp
++	src/CbcHeuristicLocal.hpp
++	src/CbcHeuristicPivotAndFix.hpp
++	src/CbcHeuristicRandRound.hpp
++	src/CbcHeuristicRENS.hpp
++	src/CbcHeuristicRINS.hpp
++	src/CbcHeuristicVND.hpp
++	src/CbcMessage.hpp
++	src/CbcModel.hpp
++	src/CbcNode.hpp
++	src/CbcNodeInfo.hpp
++	src/CbcNWay.hpp
++	src/CbcObject.hpp
++	src/CbcObjectUpdateData.hpp
++	src/CbcPartialNodeInfo.hpp
++	src/CbcSimpleInteger.hpp
++	src/CbcSimpleIntegerDynamicPseudoCost.hpp
++	src/CbcSimpleIntegerPseudoCost.hpp
++	src/CbcStrategy.hpp
++	src/CbcSolver.hpp
++	src/CbcMipStartIO.hpp
++	src/CbcSOS.hpp
++	src/CbcSubProblem.hpp
++	src/CbcTree.hpp
++	src/CbcLinked.hpp
++	src/CbcTreeLocal.hpp
++	src/ClpConstraintAmpl.hpp
++	src/ClpAmplObjective.hpp)
++
++add_library(Cbc ${_SRCS} ${_HDRS})
++target_include_directories(Cbc PRIVATE src)
++if(WIN32)
++	target_compile_definitions(Cbc _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif ()
++target_link_libraries(Cbc PRIVATE CoinUtils::CoinUtils ZLIB::ZLIB)
++add_library(Cbc::Cbc ALIAS Cbc)
+diff --git a/Cgl/CMakeLists.txt b/Cgl/CMakeLists.txt
+new file mode 100644
+index 0000000..453dc29
+--- /dev/null
++++ b/Cgl/CMakeLists.txt
+@@ -0,0 +1,98 @@
++find_package(CoinUtils)
++find_package(ZLIB)
++
++set(_SRCS
++	src/CglMixedIntegerRounding/CglMixedIntegerRoundingTest.cpp
++	src/CglMixedIntegerRounding/CglMixedIntegerRounding.cpp
++	src/CglDuplicateRow/CglDuplicateRow.cpp
++	src/CglCutGenerator.cpp
++	src/CglPreProcess/CglPreProcess.cpp
++	src/CglProbing/CglProbing.cpp
++	src/CglProbing/CglProbingTest.cpp
++	src/CglMixedIntegerRounding2/CglMixedIntegerRounding2.cpp
++	src/CglMixedIntegerRounding2/CglMixedIntegerRounding2Test.cpp
++	src/CglLandP/CglLandPUtils.cpp
++	src/CglLandP/CglLandPTest.cpp
++	src/CglLandP/CglLandPTabRow.cpp
++	src/CglLandP/CglLandPSimplex.cpp
++	src/CglLandP/CglLandPValidator.cpp
++	src/CglLandP/CglLandPMessages.cpp
++	src/CglLandP/CglLandP.cpp
++	src/CglOddHole/CglOddHoleTest.cpp
++	src/CglOddHole/CglOddHole.cpp
++	src/CglRedSplit/CglRedSplitParam.cpp
++	src/CglRedSplit/CglRedSplit.cpp
++	src/CglRedSplit/CglRedSplitTest.cpp
++	src/CglAllDifferent/CglAllDifferent.cpp
++	src/CglKnapsackCover/CglKnapsackCoverTest.cpp
++	src/CglKnapsackCover/CglKnapsackCover.cpp
++	src/CglSimpleRounding/CglSimpleRoundingTest.cpp
++	src/CglSimpleRounding/CglSimpleRounding.cpp
++	src/CglZeroHalf/CglZeroHalfTest.cpp
++	src/CglZeroHalf/Cgl012cut.cpp
++	src/CglZeroHalf/CglZeroHalf.cpp
++	src/CglRedSplit2/CglRedSplit2Test.cpp
++	src/CglRedSplit2/CglRedSplit2Param.cpp
++	src/CglRedSplit2/CglRedSplit2.cpp
++	src/CglMessage.cpp
++	src/CglStored.cpp
++	src/CglParam.cpp
++	src/CglResidualCapacity/CglResidualCapacity.cpp
++	src/CglResidualCapacity/CglResidualCapacityTest.cpp
++	src/CglTwomir/CglTwomirTest.cpp
++	src/CglTwomir/CglTwomir.cpp
++	src/CglFlowCover/CglFlowCoverTest.cpp
++	src/CglFlowCover/CglFlowCover.cpp
++	src/CglClique/CglCliqueHelper.cpp
++	src/CglClique/CglCliqueTest.cpp
++	src/CglClique/CglClique.cpp
++	src/CglTreeInfo.cpp
++	src/CglLiftAndProject/CglLiftAndProject.cpp
++	src/CglGomory/CglGomoryTest.cpp
++	src/CglGomory/CglGomory.cpp
++	src/CglGMI/CglGMI.cpp
++	src/CglGMI/CglGMIParam.cpp)
++
++set(_HDRS
++	src/CglMixedIntegerRounding/CglMixedIntegerRounding.hpp
++	src/CglDuplicateRow/CglDuplicateRow.hpp
++	src/CglStored.hpp
++	src/CglPreProcess/CglPreProcess.hpp
++	src/CglProbing/CglProbing.hpp
++	src/CglMixedIntegerRounding2/CglMixedIntegerRounding2.hpp
++	src/CglLandP/CglLandP.hpp
++	src/CglLandP/CglLandPUtils.hpp
++	src/CglLandP/CglLandPValidator.hpp
++	src/CglLandP/CglLandPTabRow.hpp
++	src/CglLandP/CglLandPMessages.hpp
++	src/CglLandP/CglLandPSimplex.hpp
++	src/CglOddHole/CglOddHole.hpp
++	src/CglRedSplit/CglRedSplitParam.hpp
++	src/CglRedSplit/CglRedSplit.hpp
++	src/CglAllDifferent/CglAllDifferent.hpp
++	src/CglKnapsackCover/CglKnapsackCover.hpp
++	src/CglSimpleRounding/CglSimpleRounding.hpp
++	src/CglMessage.hpp
++	src/CglZeroHalf/CglZeroHalf.hpp
++	src/CglZeroHalf/Cgl012cut.hpp
++	src/CglRedSplit2/CglRedSplit2Param.hpp
++	src/CglRedSplit2/CglRedSplit2.hpp
++	src/CglCutGenerator.hpp
++	src/CglResidualCapacity/CglResidualCapacity.hpp
++	src/CglTwomir/CglTwomir.hpp
++	src/CglFlowCover/CglFlowCover.hpp
++	src/CglClique/CglClique.hpp
++	src/CglLiftAndProject/CglLiftAndProject.hpp
++	src/CglGomory/CglGomory.hpp
++	src/CglGMI/CglGMIParam.hpp
++	src/CglGMI/CglGMI.hpp
++	src/CglParam.hpp
++	src/CglTreeInfo.hpp)
++
++add_library(Cgl ${_SRCS} ${_HDRS})
++target_include_directories(Cgl PRIVATE src)
++if(WIN32)
++	target_compile_definitions(Cgl _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif ()
++target_link_libraries(Cgl PRIVATE CoinUtils::CoinUtils ZLIB::ZLIB)
++add_library(Cgl::Cgl ALIAS Cgl)
+diff --git a/Clp/CMakeLists.txt b/Clp/CMakeLists.txt
+new file mode 100644
+index 0000000..9072674
+--- /dev/null
++++ b/Clp/CMakeLists.txt
+@@ -0,0 +1,102 @@
++find_package(CoinUtils)
++find_package(ZLIB)
++
++set(_SRCS
++	src/ClpCholeskyBase.cpp
++	src/ClpCholeskyDense.cpp
++	src/ClpConstraint.cpp
++	src/ClpConstraintLinear.cpp
++	src/ClpConstraintQuadratic.cpp
++	src/Clp_C_Interface.cpp
++	src/ClpDualRowDantzig.cpp
++	src/ClpDualRowPivot.cpp
++	src/ClpDualRowSteepest.cpp
++	src/ClpDummyMatrix.cpp
++	src/ClpDynamicExampleMatrix.cpp
++	src/ClpDynamicMatrix.cpp
++	src/ClpEventHandler.cpp
++	src/ClpFactorization.cpp
++	src/ClpGubDynamicMatrix.cpp
++	src/ClpGubMatrix.cpp
++	src/ClpHelperFunctions.cpp
++	src/ClpInterior.cpp
++	src/ClpLinearObjective.cpp
++	src/ClpMatrixBase.cpp
++	src/ClpMessage.cpp
++	src/ClpModel.cpp
++	src/ClpNetworkBasis.cpp
++	src/ClpNetworkMatrix.cpp
++	src/ClpNonLinearCost.cpp
++	src/ClpNode.cpp
++	src/ClpObjective.cpp
++	src/ClpPackedMatrix.cpp
++	src/ClpPlusMinusOneMatrix.cpp
++	src/ClpPredictorCorrector.cpp
++	src/ClpPdco.cpp
++	src/ClpPdcoBase.cpp
++	src/ClpLsqr.cpp
++	src/ClpPresolve.cpp
++	src/ClpPrimalColumnDantzig.cpp
++	src/ClpPrimalColumnPivot.cpp
++	src/ClpPrimalColumnSteepest.cpp
++	src/ClpQuadraticObjective.cpp
++	src/ClpSimplex.cpp
++	src/ClpSimplexDual.cpp
++	src/ClpSimplexNonlinear.cpp
++	src/ClpSimplexOther.cpp
++	src/ClpSimplexPrimal.cpp
++	src/ClpSolve.cpp
++	src/Idiot.cpp
++	src/IdiSolve.cpp)
++
++set(_HDRS
++	src/Clp_C_Interface.h
++	src/ClpCholeskyBase.hpp
++	src/ClpCholeskyDense.hpp
++	src/ClpConstraint.hpp
++	src/ClpConstraintLinear.hpp
++	src/ClpConstraintQuadratic.hpp
++	src/ClpDualRowDantzig.hpp
++	src/ClpDualRowPivot.hpp
++	src/ClpDualRowSteepest.hpp
++	src/ClpDummyMatrix.hpp
++	src/ClpDynamicExampleMatrix.hpp
++	src/ClpDynamicMatrix.hpp
++	src/ClpEventHandler.hpp
++	src/ClpFactorization.hpp
++	src/ClpGubDynamicMatrix.hpp
++	src/ClpGubMatrix.hpp
++	src/ClpInterior.hpp
++	src/ClpLinearObjective.hpp
++	src/ClpMatrixBase.hpp
++	src/ClpMessage.hpp
++	src/ClpModel.hpp
++	src/ClpNetworkMatrix.hpp
++	src/ClpNonLinearCost.hpp
++	src/ClpNode.hpp
++	src/ClpObjective.hpp
++	src/ClpPackedMatrix.hpp
++	src/ClpPdcoBase.hpp
++	src/ClpPlusMinusOneMatrix.hpp
++	src/ClpParameters.hpp
++	src/ClpPresolve.hpp
++	src/ClpPrimalColumnDantzig.hpp
++	src/ClpPrimalColumnPivot.hpp
++	src/ClpPrimalColumnSteepest.hpp
++	src/ClpQuadraticObjective.hpp
++	src/ClpSimplex.hpp
++	src/ClpSimplexNonlinear.hpp
++	src/ClpSimplexOther.hpp
++	src/ClpSimplexDual.hpp
++	src/ClpSimplexPrimal.hpp
++	src/ClpSolve.hpp
++	src/CbcOrClpParam.hpp
++	src/Idiot.hpp)
++
++add_library(Clp ${_SRCS} ${_HDRS})
++target_include_directories(Clp PRIVATE src)
++if(WIN32)
++	target_compile_definitions(Clp _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif ()
++target_link_libraries(Clp PRIVATE CoinUtils::CoinUtils ZLIB::ZLIB)
++add_library(Clp::Clp ALIAS Clp)
+diff --git a/CoinUtils/CMakeLists.txt b/CoinUtils/CMakeLists.txt
+new file mode 100644
+index 0000000..8b4795d
+--- /dev/null
++++ b/CoinUtils/CMakeLists.txt
+@@ -0,0 +1,130 @@
++find_package(ZLIB)
++
++set(_SRCS
++	src/CoinAlloc.cpp
++	src/CoinBuild.cpp
++	src/CoinDenseVector.cpp
++	src/CoinError.cpp
++	src/CoinFactorization1.cpp
++	src/CoinFactorization2.cpp
++	src/CoinFactorization3.cpp
++	src/CoinFactorization4.cpp
++	src/CoinSimpFactorization.cpp
++	src/CoinDenseFactorization.cpp
++	src/CoinOslFactorization.cpp
++	src/CoinOslFactorization2.cpp
++	src/CoinOslFactorization3.cpp
++	src/CoinFileIO.cpp
++	src/CoinFinite.cpp
++	src/CoinIndexedVector.cpp
++	src/CoinLpIO.cpp
++	src/CoinMessage.cpp
++	src/CoinMessageHandler.cpp
++	src/CoinModel.cpp
++	src/CoinStructuredModel.cpp
++	src/CoinModelUseful.cpp
++	src/CoinModelUseful2.cpp
++	src/CoinMpsIO.cpp
++	src/CoinPackedMatrix.cpp
++	src/CoinPackedVector.cpp
++	src/CoinPackedVectorBase.cpp
++	src/CoinParam.cpp
++	src/CoinParamUtils.cpp
++	src/CoinPostsolveMatrix.cpp
++	src/CoinPrePostsolveMatrix.cpp
++	src/CoinPresolveDoubleton.cpp
++	src/CoinPresolveDual.cpp
++	src/CoinPresolveDupcol.cpp
++	src/CoinPresolveEmpty.cpp
++	src/CoinPresolveFixed.cpp
++	src/CoinPresolveForcing.cpp
++	src/CoinPresolveHelperFunctions.cpp
++	src/CoinPresolveImpliedFree.cpp
++	src/CoinPresolveIsolated.cpp
++	src/CoinPresolveMatrix.cpp
++	src/CoinPresolvePsdebug.cpp
++	src/CoinPresolveMonitor.cpp
++	src/CoinPresolveSingleton.cpp
++	src/CoinPresolveSubst.cpp
++	src/CoinPresolveTighten.cpp
++	src/CoinPresolveTripleton.cpp
++	src/CoinPresolveUseless.cpp
++	src/CoinPresolveZeros.cpp
++	src/CoinSearchTree.cpp
++	src/CoinShallowPackedVector.cpp
++	src/CoinSnapshot.cpp
++	src/CoinWarmStartBasis.cpp
++	src/CoinWarmStartVector.cpp
++	src/CoinWarmStartDual.cpp
++	src/CoinWarmStartPrimalDual.cpp
++	src/CoinRational.cpp)
++
++set(_HDRS
++	src/Coin_C_defines.h
++	src/CoinAlloc.hpp
++	src/CoinBuild.hpp
++	src/CoinDenseVector.hpp
++	src/CoinDistance.hpp
++	src/CoinError.hpp
++	src/CoinFactorization.hpp
++	src/CoinSimpFactorization.hpp
++	src/CoinDenseFactorization.hpp
++	src/CoinOslFactorization.hpp
++	src/CoinFileIO.hpp
++	src/CoinFinite.hpp
++	src/CoinFloatEqual.hpp
++	src/CoinHelperFunctions.hpp
++	src/CoinIndexedVector.hpp
++	src/CoinLpIO.hpp
++	src/CoinMessage.hpp
++	src/CoinMessageHandler.hpp
++	src/CoinModel.hpp
++	src/CoinStructuredModel.hpp
++	src/CoinModelUseful.hpp
++	src/CoinMpsIO.hpp
++	src/CoinPackedMatrix.hpp
++	src/CoinPackedVector.hpp
++	src/CoinPackedVectorBase.hpp
++	src/CoinParam.hpp
++	src/CoinPragma.hpp
++	src/CoinPresolveDoubleton.hpp
++	src/CoinPresolveDual.hpp
++	src/CoinPresolveDupcol.hpp
++	src/CoinPresolveEmpty.hpp
++	src/CoinPresolveFixed.hpp
++	src/CoinPresolveForcing.hpp
++	src/CoinPresolveImpliedFree.hpp
++	src/CoinPresolveIsolated.hpp
++	src/CoinPresolveMatrix.hpp
++	src/CoinPresolveMonitor.hpp
++	src/CoinPresolvePsdebug.hpp
++	src/CoinPresolveSingleton.hpp
++	src/CoinPresolveSubst.hpp
++	src/CoinPresolveTighten.hpp
++	src/CoinPresolveTripleton.hpp
++	src/CoinPresolveUseless.hpp
++	src/CoinPresolveZeros.hpp
++	src/CoinSearchTree.hpp
++	src/CoinShallowPackedVector.hpp
++	src/CoinSignal.hpp
++	src/CoinSmartPtr.hpp
++	src/CoinSnapshot.hpp
++	src/CoinSort.hpp
++	src/CoinTime.hpp
++	src/CoinTypes.hpp
++	src/CoinUtility.hpp
++	src/CoinWarmStart.hpp
++	src/CoinWarmStartBasis.hpp
++	src/CoinWarmStartVector.hpp
++	src/CoinWarmStartDual.hpp
++	src/CoinWarmStartPrimalDual.hpp
++	src/CoinRational.hpp)
++
++add_library(CoinUtils ${_SRCS} ${_HDRS})
++target_include_directories(CoinUtils PRIVATE src)
++target_compile_definitions(CoinUtils PUBLIC COIN_HAS_ZLIB)
++if(WIN32)
++	target_compile_definitions(CointUtils _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif ()
++target_link_libraries(CoinUtils PRIVATE ZLIB::ZLIB)
++add_library(CoinUtils::CointUtils ALIAS CoinUtils)
+diff --git a/Osi/CMakeLists.txt b/Osi/CMakeLists.txt
+new file mode 100644
+index 0000000..ae69fad
+--- /dev/null
++++ b/Osi/CMakeLists.txt
+@@ -0,0 +1,38 @@
++find_package(CoinUtils)
++
++set(_SRCS
++	src/Osi/OsiAuxInfo.cpp
++	src/Osi/OsiBranchingObject.cpp
++	src/Osi/OsiChooseVariable.cpp
++	src/Osi/OsiColCut.cpp
++	src/Osi/OsiCut.cpp
++	src/Osi/OsiCuts.cpp
++	src/Osi/OsiNames.cpp
++	src/Osi/OsiPresolve.cpp
++	src/Osi/OsiRowCut.cpp
++	src/Osi/OsiRowCutDebugger.cpp
++	src/Osi/OsiSolverBranch.cpp
++	src/Osi/OsiSolverInterface.cpp)
++
++set(_HDRS
++	src/Osi/OsiAuxInfo.hpp
++	src/Osi/OsiBranchingObject.hpp
++	src/Osi/OsiChooseVariable.hpp
++	src/Osi/OsiColCut.hpp
++	src/Osi/OsiCollections.hpp
++	src/Osi/OsiCut.hpp
++	src/Osi/OsiCuts.hpp
++	src/Osi/OsiPresolve.hpp
++	src/Osi/OsiRowCut.hpp
++	src/Osi/OsiRowCutDebugger.hpp
++	src/Osi/OsiSolverBranch.hpp
++	src/Osi/OsiSolverInterface.hpp
++	src/Osi/OsiSolverParameters.hpp)
++
++add_library(Osi ${_SRCS} ${_HDRS})
++target_include_directories(Osi PRIVATE src/Osi)
++if(WIN32)
++	target_compile_definitions(Osi _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif ()
++target_link_libraries(Osi PRIVATE CoinUtils::CoinUtils)
++add_library(Osi::Osi ALIAS Osi)
