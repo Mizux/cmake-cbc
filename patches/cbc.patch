@@ -1,19 +1,171 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..6971b17
+index 0000000..97aea5d
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,162 @@
 +cmake_minimum_required(VERSION 3.0.2)
-+project(Cbc VERSION 2.9.9 LANGUAGES CXX)
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 +
 +include(CTest)
++include(ParseAc)
++
++project(Cbc VERSION 2.9.9 LANGUAGES CXX)
++
++# ZLIB
++find_package(ZLIB REQUIRED)
++set(HAVE_ZLIB_H "1" CACHE INTERNAL "Use zlib")
++set(COIN_HAS_ZLIB "1" CACHE INTERNAL "Use zlib")
++
++# PTHREAD
++set(THREADS_PREFER_PTHREAD_FLAG ON)
++find_package(Threads REQUIRED)
++
++# Flags
++include (CheckIncludeFile)
++include (CheckIncludeFileCXX)
++check_include_file_cxx(cctype HAVE_CCTYPE)
++check_include_file_cxx(cmath HAVE_CMATH)
++check_include_file_cxx(cfloat HAVE_CFLOAT)
++check_include_file_cxx(cinttypes HAVE_CINTTYPES)
++check_include_file_cxx(cstdint HAVE_CSTDINT)
++check_include_file_cxx(cassert HAVE_CASSERT)
++check_include_file_cxx(cstdio HAVE_CSTDIO)
++check_include_file_cxx(cstdlib HAVE_CSTDLIB)
++check_include_file_cxx(cstdarg HAVE_CSTDARG)
++check_include_file_cxx(cstddef HAVE_CSTDDEF)
++check_include_file_cxx(cstring HAVE_CSTRING)
++check_include_file_cxx(ctime HAVE_CTIME)
++check_include_file_cxx(cieeefp HAVE_CIEEEFP)
++
++check_include_file(dlfcn.h HAVE_DLFCN_H)
++check_include_file(endian.h HAVE_ENDIAN_H)
++check_include_file(math.h HAVE_MATH_H)
++check_include_file(float.h HAVE_FLOAT_H)
++check_include_file(ieeefp.h HAVE_IEEEFP_H)
++check_include_file (inttypes.h HAVE_INTTYPES_H)
++check_include_file (memory.h HAVE_MEMORY_H)
++check_include_file (stdint.h HAVE_STDINT_H)
++check_include_file (stdlib.h HAVE_STDLIB_H)
++check_include_file (strings.h HAVE_STRINGS_H)
++check_include_file (string.h HAVE_STRING_H)
++check_include_file (sys/stat.h HAVE_SYS_STAT_H)
++check_include_file (sys/types.h HAVE_SYS_TYPES_H)
++check_include_file (unistd.h HAVE_UNISTD_H)
++
++set(STDC_HEADERS 1 CACHE INTERNAL "System has ANSI C header files")
++
++set(INCLUDES "")
++if(HAVE_CMATH)
++	list(APPEND INCLUDES "cmath")
++endif()
++if(HAVE_CFLOAT)
++	list(APPEND INCLUDES "cfloat")
++endif()
++if(HAVE_CIEEEFP)
++	list(APPEND INCLUDES "cieeefp")
++endif()
++if(HAVE_MATH_H)
++	list(APPEND INCLUDES "math.h")
++endif()
++if(HAVE_FLOAT_H)
++	list(APPEND INCLUDES "float.h")
++endif()
++if(HAVE_IEEEFP_H)
++	list(APPEND INCLUDES "ieeefp.h")
++endif()
++message(STATUS "includes: ${INCLUDES}")
++
++include(CheckSymbolExists)
++#check_symbol_exists(std::min "cmath" IS_PLOP)
++check_function_exists(std::min IS_PLOP)
++if(IS_PLOP)
++	message(STATUS "isplop found !")
++endif()
++
++# FINITE
++include(CheckSymbolExists)
++set(CMAKE_REQUIRED_LIBRARIES m)
++check_symbol_exists(isfinite "${INCLUDES}" COIN_C_FINITE_R)
++if(COIN_C_FINITE_R)
++  set(COIN_C_FINITE isfinite)
++endif()
++if(NOT COIN_C_FINITE_R)
++  check_symbol_exists(_finite "${INCLUDES}" COIN_C_FINITE_R)
++  if(COIN_C_FINITE_R)
++    set(COIN_C_FINITE _finite)
++  endif()
++endif()
++if(NOT COIN_C_FINITE_R)
++  check_symbol_exists(finite "${INCLUDES}" COIN_C_FINITE_R)
++  if(COIN_C_FINITE_R)
++    set(COIN_C_FINITE ifinite)
++  endif()
++endif()
++message(STATUS "finite: ${COIN_C_FINITE}")
++
++# ISNAN
++include(CheckFunctionExists)
++include(CheckSymbolExists)
++set(CMAKE_REQUIRED_LIBRARIES m)
++#check_symbol_exists(isnan ${INCLUDES} COIN_C_ISNAN_R)
++check_function_exists(isnan COIN_C_ISNAN_R)
++if(COIN_C_ISNAN_R)
++	message(STATUS "plop")
++	set(COIN_C_ISNAN isnan)
++else()
++	unset(COIN_C_ISNAN_R)
++endif()
++#check_symbol_exists(std::isnan ${INCLUDES} COIN_C_ISNAN_R)
++check_function_exists(std::isnan COIN_C_ISNAN_R)
++if(COIN_C_ISNAN_R)
++	message(STATUS "plop")
++	set(COIN_C_ISNAN std::isnan)
++else()
++	unset(COIN_C_ISNAN_R)
++endif()
++#check_symbol_exists(_isnan ${INCLUDES} COIN_C_ISNAN_R)
++check_function_exists(_isnan COIN_C_ISNAN_R)
++if(COIN_C_ISNAN_R)
++	message(STATUS "plop")
++	set(COIN_C_ISNAN _isnan)
++else()
++	unset(COIN_C_ISNAN_R)
++endif()
++#check_symbol_exists(isnand ${INCLUDES} COIN_C_ISNAN_R)
++check_function_exists(isnand COIN_C_ISNAN_R)
++if(COIN_C_ISNAN_R)
++	message(STATUS "plop")
++	set(COIN_C_ISNAN isnand)
++else()
++	unset(COIN_C_ISNAN_R)
++endif()
++message(STATUS "isnan: ${COIN_C_ISNAN}")
++
++# Basic type
++include(CheckTypeSize)
++check_type_size("int" SIZEOF_INT)
++check_type_size("long" SIZEOF_LONG)
++check_type_size("long long" SIZEOF_LONG_LONG)
++if(SIZEOF_LONG_LONG EQUAL "8")
++  set(COIN_INT64_T  "long long")
++  set(COIN_UINT64_T "unsigned long long")
++  set(COIN_INTPTR_T "long long")
++elseif(SIZEOF_LONG EQUAL "8")
++  set(COIN_INT64_T  "long")
++  set(COIN_UINT64_T "unsigned long")
++  set(COIN_INTPTR_T "long")
++else()
++  set(COIN_INT64_T  "int")
++  set(COIN_UINT64_T "unsigned int")
++  set(COIN_INTPTR_T "int")
++endif()
 +
 +add_subdirectory(CoinUtils)
-+add_subdirectory(Osi)
-+add_subdirectory(Clp)
-+add_subdirectory(Cgl)
-+add_subdirectory(Cbc)
++#add_subdirectory(Osi)
++#add_subdirectory(Clp)
++#add_subdirectory(Cgl)
++#add_subdirectory(Cbc)
 diff --git a/Cbc/CMakeLists.txt b/Cbc/CMakeLists.txt
 new file mode 100644
 index 0000000..b489b04
@@ -407,11 +559,23 @@ index 0000000..9072674
 +add_library(Clp::Clp ALIAS Clp)
 diff --git a/CoinUtils/CMakeLists.txt b/CoinUtils/CMakeLists.txt
 new file mode 100644
-index 0000000..8b4795d
+index 0000000..448c611
 --- /dev/null
 +++ b/CoinUtils/CMakeLists.txt
-@@ -0,0 +1,130 @@
-+find_package(ZLIB)
+@@ -0,0 +1,147 @@
++set(NAME "COINUTILS")
++parse_ac(VERSION MAJOR MINOR PATCH)
++
++if(HAVE_CSTDINT)
++	set(${NAME}_HAS_CSTDINT "1" CACHE INTERNAL
++		"${NAME} has cstdint")
++endif()
++
++set(COIN_${NAME}_CHECKLEVEL "0" CACHE INTERNAL
++	"${NAME} check level")
++set(COIN_${NAME}_VERBOSITY "0" CACHE INTERNAL
++	"${NAME} verbosity level")
++configure_file(src/config.h.cmake.in config.h)
 +
 +set(_SRCS
 +	src/CoinAlloc.cpp
@@ -535,12 +699,133 @@ index 0000000..8b4795d
 +
 +add_library(CoinUtils ${_SRCS} ${_HDRS})
 +target_include_directories(CoinUtils PRIVATE src)
-+target_compile_definitions(CoinUtils PUBLIC COIN_HAS_ZLIB)
++target_compile_definitions(CoinUtils PUBLIC
++	COIN_HAS_ZLIB
++	CBC_THREAD_SAFE	CBC_NO_INTERRUPT
++	COINUTILS_BUILD HAVE_CONFIG_H)
 +if(WIN32)
 +	target_compile_definitions(CointUtils _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
 +endif ()
-+target_link_libraries(CoinUtils PRIVATE ZLIB::ZLIB)
-+add_library(CoinUtils::CointUtils ALIAS CoinUtils)
++target_link_libraries(CoinUtils PRIVATE
++	ZLIB::ZLIB
++	Threads::Threads)
++add_library(CoinUtils::CoinUtils ALIAS CoinUtils)
+diff --git a/CoinUtils/src/config.h.cmake.in b/CoinUtils/src/config.h.cmake.in
+new file mode 100644
+index 0000000..1952975
+--- /dev/null
++++ b/CoinUtils/src/config.h.cmake.in
+@@ -0,0 +1,110 @@
++/*config.h. Generated by configure_file.*/
++
++/* VERSION */
++#define VERSION "${VERSION}"
++/* ${NAME}_VERSION */
++#define ${NAME}_VERSION "${VERSION}"
++/* ${NAME}_VERSION_MAJOR */
++#define ${NAME}_VERSION_MAJOR ${MAJOR}
++/* ${NAME}_VERSION_MINOR */
++#define ${NAME}_VERSION_MINOR ${MINOR}
++/* ${NAME}_VERSION_RELEASE */
++#define ${NAME}_VERSION_RELEASE ${PATCH}
++
++/*#define STDC_HEADERS 1
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
++/* HAVE_CMATH */
++#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CFLOAT */
++#cmakedefine HAVE_CFLOAT ${HAVE_CFLOAT}
++/* HAVE_CINTTYPES */
++#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
++/* HAVE_CSTDINT */
++#cmakedefine HAVE_CSTDINT ${HAVE_CSTDINT}
++/* HAVE_CASSERT */
++#cmakedefine HAVE_CASSERT ${HAVE_CASSERT}
++/* HAVE_CSTDIO */
++#cmakedefine HAVE_CSTDIO ${HAVE_CSTDIO}
++/* HAVE_CSTDLIB */
++#cmakedefine HAVE_CSTDLIB ${HAVE_CSTDLIB}
++/* HAVE_CSTDARG */
++#cmakedefine HAVE_CSTDARG ${HAVE_CSTDARG}
++/* HAVE_CSTDDEF */
++#cmakedefine HAVE_CSTDDEF ${HAVE_CSTDDEF}
++/* HAVE_CSTRING */
++#cmakedefine HAVE_CSTRING ${HAVE_CSTRING}
++/* HAVE_CTIME */
++#cmakedefine HAVE_CTIME ${HAVE_CTIME}
++/* HAVE_CIEEEFP */
++#cmakedefine HAVE_CIEEEFP ${HAVE_CIEEEFP}
++
++/* HAVE_DLFCN_H */
++#cmakedefine HAVE_DLFCN_H ${HAVE_DLFCN_H}
++/* HAVE_ENDIAN_H */
++#cmakedefine HAVE_ENDIAN_H ${HAVE_ENDIAN_H}
++/* HAVE_MATH_H */
++#cmakedefine HAVE_MATH_H ${HAVE_MATH_H}
++/* HAVE_FLOAT_H */
++#cmakedefine HAVE_FLOAT_H ${HAVE_FLOAT_H}
++/* HAVE_IEEEFP_H */
++#cmakedefine HAVE_IEEEFP_H ${HAVE_IEEEFP_H}
++/* HAVE_INTTYPES_H */
++#cmakedefine HAVE_INTTYPES_H ${HAVE_INTTYPES_H}
++/* HAVE_MEMORY_H */
++#cmakedefine HAVE_MEMORY_H ${HAVE_MEMORY_H}
++/* HAVE_STDINT_H */
++#cmakedefine HAVE_STDINT_H ${HAVE_STDINT_H}
++/* HAVE_STDLIB_H */
++#cmakedefine HAVE_STDLIB_H ${HAVE_STDLIB_H}
++/* HAVE_STRINGS_H */
++#cmakedefine HAVE_STRINGS_H ${HAVE_STRINGS_H}
++/* HAVE_STRING_H */
++#cmakedefine HAVE_STRING_H ${HAVE_STRING_H}
++/* HAVE_SYS_STAT_H */
++#cmakedefine HAVE_SYS_STAT_H ${HAVE_SYS_STAT_H}
++/* HAVE_SYS_TYPES_H */
++#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
++/* HAVE_UNISTD_H */
++#cmakedefine HAVE_UNISTD_H ${HAVE_UNISTD_H}
++/* HAVE_ZLIB_H */
++#cmakedefine HAVE_ZLIB_H ${HAVE_ZLIB_H}
++
++/* COIN_HAS_ZLIB */
++#cmakedefine COIN_HAS_ZLIB "${COIN_HAS_ZLIB}"
++/* COIN_C_FINITE */
++#cmakedefine COIN_C_FINITE "${COIN_C_FINITE}"
++/* COIN_C_ISNAN */
++#cmakedefine COIN_C_ISNAN "${COIN_C_ISNAN}"
++/* COIN_INT64_T */
++#cmakedefine COIN_INT64_T ${COIN_INT64_T}
++/* COIN_UINT64_T */
++#cmakedefine COIN_UINT64_T ${COIN_UINT64_T}
++/* COIN_INTPTR_T */
++#cmakedefine COIN_INTPTR_T ${COIN_INTPTR_T}
++
++/* COIN_${NAME}_CHECKLEVEL */
++#define COIN_${NAME}_CHECKLEVEL ${COIN_${NAME}_CHECKLEVEL}
++/* COIN_${NAME}_VERBOSITY */
++#define COIN_${NAME}_VERBOSITY ${COIN_${NAME}_VERBOSITY}
++
++/* ${NAME}_HAS_CSTDINT */
++#define ${NAME}_HAS_CSTDINT ${${NAME}_HAS_CSTDINT}
++/* ${NAME}_PTHREADS */
++#define ${NAME}_PTHREADS 1
++/* ${NAME}_MEMPOOL_MAXPOOLED */
++#define ${NAME}_MEMPOOL_MAXPOOLED -1
++
++/* PACKAGE */
++#cmakedefine PACKAGE
++/* PACKAGE_NAME */
++#cmakedefine PACKAGE_NAME
++/* PACKAGE_VERSION */
++#cmakedefine PACKAGE_VERSION
++/* PACKAGE_STRING */
++#cmakedefine PACKAGE_STRING
++/* PACKAGE_TARNAME */
++#cmakedefine PACKAGE_TARNAME
++/* PACKAGE_BUGREPORT */
++#cmakedefine PACKAGE_BUGREPORT
++
 diff --git a/Osi/CMakeLists.txt b/Osi/CMakeLists.txt
 new file mode 100644
 index 0000000..ae69fad
@@ -585,3 +870,20 @@ index 0000000..ae69fad
 +endif ()
 +target_link_libraries(Osi PRIVATE CoinUtils::CoinUtils)
 +add_library(Osi::Osi ALIAS Osi)
+diff --git a/cmake/ParseAc.cmake b/cmake/ParseAc.cmake
+new file mode 100644
+index 0000000..e12dcae
+--- /dev/null
++++ b/cmake/ParseAc.cmake
+@@ -0,0 +1,11 @@
++function(parse_ac VERSION_STRING VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
++  file(READ "configure.ac" IN)
++  # AC_INIT([Cbc],[2.9.9],[url or email])
++	string(REGEX MATCH
++		"AC_INIT\\([^,]+,\\[([0-9]+)\\.([0-9]+)\\.([0-9]+)\\],[^\\)]+\\)" AC_INIT ${IN})
++	#message(STATUS "AC_INIT: ${AC_INIT}")
++	set(${VERSION_MAJOR} ${CMAKE_MATCH_1} PARENT_SCOPE)
++	set(${VERSION_MINOR} ${CMAKE_MATCH_2} PARENT_SCOPE)
++	set(${VERSION_PATCH} ${CMAKE_MATCH_3} PARENT_SCOPE)
++	set(${VERSION_STRING} "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
++endfunction()
