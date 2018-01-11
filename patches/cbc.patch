@@ -492,7 +492,7 @@ index 0000000..0a44b06
 +	)
 diff --git a/Cbc/config.h.cmake.in b/Cbc/config.h.cmake.in
 new file mode 100644
-index 0000000..f3a9e81
+index 0000000..719ed8d
 --- /dev/null
 +++ b/Cbc/config.h.cmake.in
 @@ -0,0 +1,115 @@
@@ -556,9 +556,9 @@ index 0000000..f3a9e81
 +#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
 +
 +/* HAVE_CMATH */
-+/*#define STDC_HEADERS 1
-+/* HAVE_CCTYPE */
 +#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
 +/* HAVE_CINTTYPES */
 +#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
 +/* HAVE_CFLOAT */
@@ -788,7 +788,7 @@ index 0000000..5c49718
 +	)
 diff --git a/Cgl/config.h.cmake.in b/Cgl/config.h.cmake.in
 new file mode 100644
-index 0000000..cd76970
+index 0000000..35329dc
 --- /dev/null
 +++ b/Cgl/config.h.cmake.in
 @@ -0,0 +1,114 @@
@@ -851,9 +851,9 @@ index 0000000..cd76970
 +#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
 +
 +/* HAVE_CMATH */
-+/*#define STDC_HEADERS 1
-+/* HAVE_CCTYPE */
 +#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
 +/* HAVE_CINTTYPES */
 +#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
 +/* HAVE_CFLOAT */
@@ -1138,7 +1138,7 @@ index 0000000..429c647
 +	)
 diff --git a/Clp/config.h.cmake.in b/Clp/config.h.cmake.in
 new file mode 100644
-index 0000000..41f1f7c
+index 0000000..c12b3d4
 --- /dev/null
 +++ b/Clp/config.h.cmake.in
 @@ -0,0 +1,113 @@
@@ -1200,9 +1200,9 @@ index 0000000..41f1f7c
 +#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
 +
 +/* HAVE_CMATH */
-+/*#define STDC_HEADERS 1
-+/* HAVE_CCTYPE */
 +#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
 +/* HAVE_CINTTYPES */
 +#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
 +/* HAVE_CFLOAT */
@@ -1442,7 +1442,7 @@ index 0000000..d4efa91
 +	)
 diff --git a/CoinUtils/config.h.cmake.in b/CoinUtils/config.h.cmake.in
 new file mode 100644
-index 0000000..fee6986
+index 0000000..c493b43
 --- /dev/null
 +++ b/CoinUtils/config.h.cmake.in
 @@ -0,0 +1,127 @@
@@ -1501,9 +1501,9 @@ index 0000000..fee6986
 +#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
 +
 +/* HAVE_CMATH */
-+/*#define STDC_HEADERS 1
-+/* HAVE_CCTYPE */
 +#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
 +/* HAVE_CINTTYPES */
 +#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
 +/* HAVE_CFLOAT */
@@ -1679,7 +1679,7 @@ index 0000000..5bf646a
 +	)
 diff --git a/Osi/config.h.cmake.in b/Osi/config.h.cmake.in
 new file mode 100644
-index 0000000..af80596
+index 0000000..f544df8
 --- /dev/null
 +++ b/Osi/config.h.cmake.in
 @@ -0,0 +1,112 @@
@@ -1740,9 +1740,9 @@ index 0000000..af80596
 +#cmakedefine HAVE_SYS_TYPES_H ${HAVE_SYS_TYPES_H}
 +
 +/* HAVE_CMATH */
-+/*#define STDC_HEADERS 1
-+/* HAVE_CCTYPE */
 +#cmakedefine HAVE_CMATH ${HAVE_CMATH}
++/* HAVE_CCTYPE */
++#cmakedefine HAVE_CCTYPE ${HAVE_CCTYPE}
 +/* HAVE_CINTTYPES */
 +#cmakedefine HAVE_CINTTYPES ${HAVE_CINTTYPES}
 +/* HAVE_CFLOAT */
