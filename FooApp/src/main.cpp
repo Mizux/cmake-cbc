@@ -1,5 +1,5 @@
 #include <iostream>
-#include <coin/CbcSolver.hpp>
+#include <CbcSolver.hpp>
 
 int main(int argc, char** argv) {
 	std::cout << "hello" << std::endl;

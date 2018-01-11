@@ -2,8 +2,8 @@ project(FooApp VERSION 1.0.0 LANGUAGES CXX)
 
 file(GLOB _SRCS "src/*.[hc]pp")
 
-find_package(CoinUtils REQUIRED)
-#find_package(Cbc REQUIRED)
+#find_package(CoinUtils REQUIRED)
+find_package(Cbc REQUIRED)
 
 add_executable(${PROJECT_NAME} ${_SRCS})
 if(UNIX)
@@ -17,8 +17,7 @@ if(UNIX)
 	endif()
 endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE
-	CoinUtils::CoinUtils
-	#Cbc::Cbc
+	CbcSolver::CbcSolver
 	)
 add_executable(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
