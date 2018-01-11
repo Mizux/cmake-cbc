@@ -82,10 +82,10 @@ index 26b5a00..8407274 100644
 +  - cmake --build build --target all
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..5e8f546
+index 0000000..7663d60
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,197 @@
 +cmake_minimum_required(VERSION 3.0.2)
 +list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 +if(NOT CMAKE_BUILD_TYPE)
@@ -116,10 +116,6 @@ index 0000000..5e8f546
 +
 +project(Coin VERSION 2.9.9 LANGUAGES C CXX)
 +message(STATUS "Project: Coin")
-+
-+set(CMAKE_CXX_STANDARD 11)
-+set(CMAKE_CXX_STANDARD_REQUIRED ON)
-+set(CMAKE_CXX_EXTENSIONS OFF)
 +
 +include(CTest)
 +include(ParseAc)
@@ -289,10 +285,10 @@ index 0000000..5e8f546
 +add_subdirectory(Cbc)
 diff --git a/Cbc/CMakeLists.txt b/Cbc/CMakeLists.txt
 new file mode 100644
-index 0000000..0a44b06
+index 0000000..bb857fa
 --- /dev/null
 +++ b/Cbc/CMakeLists.txt
-@@ -0,0 +1,272 @@
+@@ -0,0 +1,275 @@
 +message(STATUS "Subproject: Cbc")
 +
 +find_package(CoinUtils REQUIRED)
@@ -468,8 +464,9 @@ index 0000000..0a44b06
 +	PUBLIC HAVE_CONFIG_H
 +	PRIVATE CBC_BUILD)
 +if(WIN32)
-+	target_compile_definitions(Cbc _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(Cbc PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(Cbc PUBLIC cxx_std_11)
 +target_link_libraries(Cbc PUBLIC
 +	CoinUtils::CoinUtils
 +	Osi::Osi
@@ -500,8 +497,9 @@ index 0000000..0a44b06
 +	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/OsiCbc>)
 +#target_compile_definitions(OsiCbc PRIVATE ...)
 +if(WIN32)
-+	target_compile_definitions(OsiCbc _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(OsiCbc PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(OsiCbc PUBLIC cxx_std_11)
 +target_link_libraries(OsiCbc PUBLIC
 +	CoinUtils::CoinUtils
 +	Osi::Osi
@@ -548,8 +546,9 @@ index 0000000..0a44b06
 +target_compile_definitions(CbcSolver
 +	PRIVATE CBC_THREAD_SAFE CBC_NO_INTERRUPT)
 +if(WIN32)
-+	target_compile_definitions(CbcSolver _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(CbcSolver PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(CbcSolver PUBLIC cxx_std_11)
 +target_link_libraries(CbcSolver PUBLIC
 +	Cbc::Cbc)
 +set_target_properties(CbcSolver PROPERTIES
@@ -707,10 +706,10 @@ index 0000000..8dc44bf
 +#endif
 diff --git a/Cgl/CMakeLists.txt b/Cgl/CMakeLists.txt
 new file mode 100644
-index 0000000..5c49718
+index 0000000..2bd82cd
 --- /dev/null
 +++ b/Cgl/CMakeLists.txt
-@@ -0,0 +1,150 @@
+@@ -0,0 +1,151 @@
 +message(STATUS "Subproject: Cgl")
 +
 +find_package(CoinUtils REQUIRED)
@@ -842,8 +841,9 @@ index 0000000..5c49718
 +	PUBLIC HAVE_CONFIG_H
 +	PRIVATE CGL_BUILD)
 +if(WIN32)
-+	target_compile_definitions(Cgl _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(Cgl PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(Cgl PUBLIC cxx_std_11)
 +target_link_libraries(Cgl PUBLIC
 +	CoinUtils::CoinUtils
 +	Osi::Osi
@@ -1002,10 +1002,10 @@ index 0000000..8dc44bf
 +#endif
 diff --git a/Clp/CMakeLists.txt b/Clp/CMakeLists.txt
 new file mode 100644
-index 0000000..429c647
+index 0000000..6f7ff7c
 --- /dev/null
 +++ b/Clp/CMakeLists.txt
-@@ -0,0 +1,205 @@
+@@ -0,0 +1,208 @@
 +message(STATUS "Subproject: Clp")
 +
 +find_package(CoinUtils REQUIRED)
@@ -1123,8 +1123,9 @@ index 0000000..429c647
 +	PUBLIC HAVE_CONFIG_H
 +	PRIVATE CLP_BUILD)
 +if(WIN32)
-+	target_compile_definitions(Clp _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(Clp PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(Clp PUBLIC cxx_std_11)
 +target_link_libraries(Clp PUBLIC
 +	CoinUtils::CoinUtils
 +	Osi::Osi)
@@ -1153,8 +1154,9 @@ index 0000000..429c647
 +	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/OsiClp>)
 +#target_compile_definitions(OsiClp PRIVATE ...)
 +if(WIN32)
-+	target_compile_definitions(OsiClp _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(OsiClp PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(OsiClp PUBLIC cxx_std_11)
 +target_link_libraries(OsiClp PUBLIC
 +	CoinUtils::CoinUtils
 +	Osi::Osi
@@ -1194,8 +1196,9 @@ index 0000000..429c647
 +	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 +#target_compile_definitions(ClpSolver PRIVATE ...)
 +if(WIN32)
-+	target_compile_definitions(ClpSolver _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(ClpSolver PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(ClpSolver PUBLIC cxx_std_11)
 +target_link_libraries(ClpSolver PUBLIC
 +	Clp::Clp)
 +set_target_properties(ClpSolver PROPERTIES
@@ -1351,10 +1354,10 @@ index 0000000..8dc44bf
 +#endif
 diff --git a/CoinUtils/CMakeLists.txt b/CoinUtils/CMakeLists.txt
 new file mode 100644
-index 0000000..d0e2bfb
+index 0000000..c2888e7
 --- /dev/null
 +++ b/CoinUtils/CMakeLists.txt
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,174 @@
 +message(STATUS "Subproject: CoinUtils")
 +
 +set(NAME "COINUTILS")
@@ -1363,7 +1366,7 @@ index 0000000..d0e2bfb
 +# PTHREAD
 +set(THREADS_PREFER_PTHREAD_FLAG ON)
 +find_package(Threads)
-+if(Threads_FOUND)
++if(CMAKE_USE_PTHREADS_INIT)
 +	set(${NAME}_PTHREADS "1" CACHE INTERNAL "Use pthread")
 +endif()
 +
@@ -1504,14 +1507,15 @@ index 0000000..d0e2bfb
 +	PUBLIC HAVE_CONFIG_H
 +	PRIVATE COINUTILS_BUILD)
 +if(WIN32)
-+	target_compile_definitions(CoinUtils _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(CoinUtils PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(CoinUtils PUBLIC cxx_std_11)
 +
 +if(ZLIB_FOUND)
 +	target_link_libraries(CoinUtils PRIVATE	ZLIB::ZLIB)
 +endif()
 +
-+if(Threads_FOUND)
++if(CMAKE_USE_PTHREADS_INIT)
 +	target_link_libraries(CoinUtils PRIVATE	Threads::Threads)
 +endif()
 +
@@ -1691,10 +1695,10 @@ index 0000000..0d85fd7
 +#endif
 diff --git a/Osi/CMakeLists.txt b/Osi/CMakeLists.txt
 new file mode 100644
-index 0000000..5bf646a
+index 0000000..2d06bfd
 --- /dev/null
 +++ b/Osi/CMakeLists.txt
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,71 @@
 +message(STATUS "Subproject: Osi")
 +
 +find_package(CoinUtils REQUIRED)
@@ -1748,8 +1752,9 @@ index 0000000..5bf646a
 +	PUBLIC HAVE_CONFIG_H
 +	PRIVATE OSI_BUILD)
 +if(WIN32)
-+	target_compile_definitions(Osi _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
-+endif ()
++	target_compile_definitions(Osi PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
++endif()
++target_compile_features(Osi PUBLIC cxx_std_11)
 +target_link_libraries(Osi PUBLIC
 +	CoinUtils::CoinUtils)
 +set_target_properties(Osi PROPERTIES
