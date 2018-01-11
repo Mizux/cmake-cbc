@@ -7,12 +7,85 @@ index 0000000..3093598
 +*.swp
 +.vs/
 +build/
+diff --git a/.travis.yml b/.travis.yml
+index 26b5a00..8407274 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -1,44 +1,35 @@
+-\language: cpp
+-env:
+-  global: 
+-    - secure: "WEPiGQTAVh02Fc5Qxvj2VBZoWBgNjjB6w5MdNwg6NtzFKhbhxB1OqfaVE7EJV1Cw9mf1k5Qcg2fSy9bQEJllWNclRpbRGfEcC+Crx3CyjFOebSr6e6T7lAjIspIVSRf9+y6oPEY2zR8yXoX/HAEYyw3IQzJtKCHIbSJrrZsPomc="
+-    
++sudo: required
++language: cpp
+ matrix:
+   include:
+     - os: linux
++      dist: trusty
++      compiler: clang
++    - os: linux
++      dist: trusty
+       addons:
+         apt:
++          sources:
++            - ubuntu-toolchain-r-test
+           packages:
+-            - gfortran
+-    - os: osx 
+-      osx_image: xcode8.2
+-      env: OSX=10.12
+-      compiler: clang
++            - g++-6
++      compiler: g++-6
+     - os: osx
+-      osx_image: xcode8
+-      env: OSX=10.11
+       compiler: clang
+     - os: osx
+-      osx_image: xcode6.4
+-      env: OSX=10.10
+-      compiler: clang
+-  allow_failures:
+-    - os: osx
++      compiler: gcc
+ 
+-before_script:
+-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then  export PLATFORM=osx$OSX-x86_64-clang`clang -dumpversion`; fi
+-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install bash gcc; brew link --overwrite gcc; gfortran --version; fi
+-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PLATFORM=linux-x86_64-gcc`gcc -dumpversion`; fi
+-  - git clone https://github.com/coin-or-tools/BuildTools
+-  - bash BuildTools/get.dependencies.sh fetch > /dev/null
++before_install:
++  - eval "${MATRIX_EVAL}"
++  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get -qq update; fi
++  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get -y install zlib1g-dev; fi
+ 
+-script:
+-  - bash BuildTools/get.dependencies.sh build --verbosity=2 --test
++  - if [ $TRAVIS_OS_NAME == osx ]; then sudo chown -R $(whoami) /usr/local; fi
++  # Avoid bug on CI with OSX, see https://github.com/travis-ci/travis-ci/issues/8552
++  - if [ $TRAVIS_OS_NAME == osx ]; then brew update; fi
++  - if [ $TRAVIS_OS_NAME == osx ]; then brew install zlib; fi
+ 
+-after_script:
+-  - if [ $TRAVIS_BRANCH = "master" ]; then export VERSION=trunk; else export VERSION=`echo $TRAVIS_BRANCH | cut -d "/" -f 2`; fi
+-  - export PROJECT=`echo $TRAVIS_REPO_SLUG | cut -d "/" -f 2`
+-  - export TGZ_FILE=$PROJECT-$VERSION-$PLATFORM.tgz
+-  - echo $TGZ_FILE
+-  - tar -czvf $TGZ_FILE build/lib/* build/bin/* build/include/* build/share/* README.md INSTALL LICENSE Cbc/AUTHORS
+-  - curl -T $TGZ_FILE -utkralphs:$BINTRAY_API -H "X-Bintray-Publish:1" -H "X-Bintray-Override:1" https://api.bintray.com/content/coin-or/download/$PROJECT/$VERSION/$TGZ_FILE
+\ No newline at end of file
++script:
++  - cmake --version
++  - cmake -H. -Bbuild -DCMAKE_VERBOSE_MAKEFILE=ON
++  - cmake --build build --target all
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..e84b553
+index 0000000..5e8f546
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,199 @@
+@@ -0,0 +1,201 @@
 +cmake_minimum_required(VERSION 3.0.2)
 +list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 +if(NOT CMAKE_BUILD_TYPE)
@@ -44,17 +117,19 @@ index 0000000..e84b553
 +project(Coin VERSION 2.9.9 LANGUAGES C CXX)
 +message(STATUS "Project: Coin")
 +
++set(CMAKE_CXX_STANDARD 11)
++set(CMAKE_CXX_STANDARD_REQUIRED ON)
++set(CMAKE_CXX_EXTENSIONS OFF)
++
 +include(CTest)
 +include(ParseAc)
 +
 +# ZLIB
-+find_package(ZLIB REQUIRED)
-+set(HAVE_ZLIB_H "1" CACHE INTERNAL "Use zlib")
-+set(COIN_HAS_ZLIB "1" CACHE INTERNAL "Use zlib")
-+
-+# PTHREAD
-+set(THREADS_PREFER_PTHREAD_FLAG ON)
-+find_package(Threads REQUIRED)
++find_package(ZLIB)
++if(ZLIB_FOUND)
++	set(HAVE_ZLIB_H "1" CACHE INTERNAL "Use zlib")
++	set(COIN_HAS_ZLIB "1" CACHE INTERNAL "Use zlib")
++endif()
 +
 +# Flags
 +include (CheckIncludeFile)
@@ -1276,14 +1351,21 @@ index 0000000..8dc44bf
 +#endif
 diff --git a/CoinUtils/CMakeLists.txt b/CoinUtils/CMakeLists.txt
 new file mode 100644
-index 0000000..d4efa91
+index 0000000..d0e2bfb
 --- /dev/null
 +++ b/CoinUtils/CMakeLists.txt
-@@ -0,0 +1,160 @@
+@@ -0,0 +1,173 @@
 +message(STATUS "Subproject: CoinUtils")
 +
 +set(NAME "COINUTILS")
 +parse_ac(VERSION MAJOR MINOR PATCH)
++
++# PTHREAD
++set(THREADS_PREFER_PTHREAD_FLAG ON)
++find_package(Threads)
++if(Threads_FOUND)
++	set(${NAME}_PTHREADS "1" CACHE INTERNAL "Use pthread")
++endif()
 +
 +set(COIN_${NAME}_CHECKLEVEL "0" CACHE INTERNAL
 +	"${NAME} check level")
@@ -1424,9 +1506,15 @@ index 0000000..d4efa91
 +if(WIN32)
 +	target_compile_definitions(CoinUtils _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
 +endif ()
-+target_link_libraries(CoinUtils PRIVATE
-+	ZLIB::ZLIB
-+	Threads::Threads)
++
++if(ZLIB_FOUND)
++	target_link_libraries(CoinUtils PRIVATE	ZLIB::ZLIB)
++endif()
++
++if(Threads_FOUND)
++	target_link_libraries(CoinUtils PRIVATE	Threads::Threads)
++endif()
++
 +set_target_properties(CoinUtils PROPERTIES
 +	PUBLIC_HEADER "${_HDRS};${CMAKE_CURRENT_BINARY_DIR}/config_coinutils.h"
 +	VERSION ${VERSION})
@@ -1442,7 +1530,7 @@ index 0000000..d4efa91
 +	)
 diff --git a/CoinUtils/config.h.cmake.in b/CoinUtils/config.h.cmake.in
 new file mode 100644
-index 0000000..c493b43
+index 0000000..ecc0a94
 --- /dev/null
 +++ b/CoinUtils/config.h.cmake.in
 @@ -0,0 +1,127 @@
@@ -1551,7 +1639,7 @@ index 0000000..c493b43
 +#endif
 +
 +/* ${NAME}_PTHREADS */
-+#define ${NAME}_PTHREADS 1
++#cmakedefine COINUTILS_PTHREADS ${COINUTILS_PTHREADS}
 +/* ${NAME}_MEMPOOL_MAXPOOLED */
 +#define ${NAME}_MEMPOOL_MAXPOOLED -1
 +
@@ -1814,6 +1902,826 @@ index 0000000..8dc44bf
 +#define ${NAME}_VERSION_RELEASE ${PATCH}
 +
 +#endif
+diff --git a/README b/README
+index b72bec9..1cd1666 100644
+--- a/README
++++ b/README
+@@ -1,6 +1,339 @@
+ To install this package, please look at the INSTALL file.
+- 
++
+ This package contains several subdirectories corresponding to COIN-OR
+-projects (www.coin-or.org). The AUTHORS, LICENSE and README files in 
++projects (www.coin-or.org). The AUTHORS, LICENSE and README files in
+ each of the subdirectories give more information about these projects.
+ 
++# CBC Version 2.9.8 README
++
++Welcome to the README for the COIN Branch and Cut Solver (CBC). CBC is
++distributed under the Eclipse Public License and is freely redistributable.
++All source code and documentation is Copyright IBM and others. This README may
++be redistributed freely.
++
++## Current Testing Status
++
++[![Build Status](https://travis-ci.org/coin-or/Cbc.svg?branch=master)](https://travis-ci.org/coin-or/Cbc)
++
++[![Build status](https://ci.appveyor.com/api/projects/status/l2hwifsxwhswng8y/branch/master?svg=true)](https://ci.appveyor.com/project/tkralphs/cbc/branch/master)
++
++## DOWNLOAD
++
++[ ![Download](https://api.bintray.com/packages/coin-or/download/Cbc/images/download.svg) ](https://bintray.com/coin-or/download/Cbc/2.9)
++
++Binaries for most platforms are available for download from [Bintray](https://bintray.com/coin-or/download/Cbc)
++
++## DOCUMENTATION
++
++For a quick start guide, please see the INSTALL file in this distribution. A
++(somehwat outdated) user's manual is available here:
++
++http://www.coin-or.org/Cbc
++
++More up-to-date automatically generated documentation of the source code can
++be found here:
++
++http://www.coin-or.org/Doxygen/Cbc/
++
++Further information can be found here:
++
++http://projects.coin-or.org/Cbc
++
++## SUPPORT
++
++### List Serve
++
++CBC users should use the Cbc mailing list. To subscribe, go to
++http://list.coin-or.org/mailman/listinfo/cbc
++
++### Bug Reports
++
++Bug reports should be reported on the CBC development web site at
++
++https://projects.coin-or.org/Cbc/newticket
++
++## CHANGELOG
++
++ * Release 2.9.8
++
++   * Update to most current releases of dependencies
++   * Small bug fixes
++   * Add support for automatic build and test with Travis and Appveyor
++
++ * Release 2.9.7
++
++   * Small bug fixes
++   * Option to switch to line buffered output
++
++ * Release 2.9.6
++
++   * Small bug fixes
++
++ * Release 2.9.5
++
++   * Small bug fixes
++
++ * Release 2.9.4
++
++   * Small fixes for stability
++   * Fixes for Doygen documentation generation
++
++ * Release 2.9.3
++
++   * Minor bug fixes
++
++ * Release 2.9.2
++
++   * Fix for proper installation with ```DESTDIR```
++
++ * Release 2.9.1
++
++   * Fix for dependency linking
++   * Minor bug fixes
++
++ * Release 2.9.0
++
++   * Introduced specialized branching methods for dealing with "big Ms".
++   * Introduced new methods for dealing with symmetry (requires installation of [nauty](http://pallini.di.uniroma1.it/))
++   * Introduction of conflict cuts (off by default, turn on with `-constraint conflict`)
++
++ * Release 2.8.13
++
++   * Improved message handling
++   * Miscellaneous bug fixes.
++
++ * Release 2.8.12
++
++   * Update for dependencies.
++
++ * Release 2.8.11
++
++   * Major overhaul of C interface
++   * Fixes to SOS
++   * Miscellaneous bug fixes
++
++ * Release 2.8.10
++
++   * More changes related to thread safety.
++   * Fix bug in build system with Visual Studio compiler.
++   * Miscellaneous bug fixes.
++
++ * Release 2.8.9
++
++   * Attempt to make Cbc thread safe.
++   * Add parallel examples.
++   * Add CbcSolverUsefulInfo.
++   * Bug fixes.
++
++ * Release 2.8.8
++
++   * Added example to show how to use Cbc with installed libraries in MSVC++
++   * Fixed inconsistency in addition of libCbcSolver to dependencies in
++     {{{cbc_addlibs.txt}}}.
++
++ * Release 2.8.7
++
++   * Changed so that Doxygen builds LaTex
++   * Fixes for build system
++
++ * Release 2.8.6
++
++   * Added option to explicitly link dependencies to comply with packaging
++     requirements on Fedora and Debian, as well as allow building of MinGW
++     DLLs.
++
++ * Release 2.8.5
++
++   * Minor fixes to build system
++
++ * Release 2.8.4
++
++   * Small bug fixes
++   * Upgrades to build system
++
++ * Release 2.8.3:
++
++   * Fix for handling SOS.
++
++ * Release 2.8.2:
++
++   * Fixed recognition of Glpk source in main configure.
++   * Minor bug fixes in CoinUtils, Clp, and Cbc.
++
++ * Release 2.8.1:
++
++   * Minor bug fixes
++
++ * Release 2.8.0:
++
++   * Introduced new secondaryStatus 8 to indicate that solving stopped due to
++     an iteration limit.
++   * Solution pool is now accessible via the command line and the CbcMain*
++     interface.
++   * New mipstart option to read an initial feasible solution from a file.
++     Only values for discrete variables need to be provided.
++
++   * Added Proximity Search heuristic by Fischetti and Monaci (off by
++     default): The simplest way to switch it on using stand-alone version is
++     ```-proximity on```.
++
++     Proximity Search is the new "No-Neighborhood Search" 0-1 MIP refinement
++     heuristic recently proposed by Fischetti and Monaci (2012). The idea is
++     to define a sub-MIP without additional constraints but with a modified
++     objective function intended to attract the search in the proximity of the
++     incumbent. The approach works well for 0-1 MIPs whose solution landscape
++     is not too irregular (meaning the there is reasonable probability of
++     finding an improved solution by flipping a small number of binary
++     variables), in particular when it is applied to the first heuristic
++     solutions found at the root node.
++
++   * An implementation of Zero-Half-Cuts by Alberto Caprara is now available.
++     By default, these cuts are off. To use add to your command line
++     -zerohalfCuts root (or other options) or just -zero. So far, they may
++     help only on a small subset of problems and may need some tuning.
++
++     The implementation of these cuts is described in G. Andreello, A.
++     Caprara, and M. Fischetti "Embedding Cuts in a Branch and Cut Framework:
++     a Computational Study with {0,1/2}-Cuts" INFORMS Journal on Computing
++     19(2), 229-238, 2007 http://dx.doi.org/10.1287/ijoc.1050.0162
++
++   * An alternative implementation of a reduce and split cut generator by
++     Giacomo Nannicini is now available. By default, these cuts are off. To
++     use add to your command line -reduce2AndSplitCuts root (or other
++     options).
++
++     The implementation of these cuts is described in G. Cornuejols and G.
++     Nannicini "Practical strategies for generating rank-1 split cuts in
++     mixed-integer linear programming" Mathematical Programming Computation
++     3(4), 281-318, 2011 http://dx.doi.org/10.1007/s12532-011-0028-6
++
++   * An alternative robust implementation of a Gomory cut generator by Giacomo
++     Nannicini is now available. By default, these cuts are off. To use add to
++     your command line -GMI root (or other options).
++
++     The implementation of these cuts is described in G. Cornuejols, F.
++     Margot, and G. Nannicini "On the safety of Gomory cut generators"
++     http://faculty.sutd.edu.sg/~nannicini/index.php?page=publications
++
++   * To encourage the use of some of the more exotic/expensive cut generators
++     a parameter -slowcutpasses has been added. The idea is that the code does
++     these cuts just a few times - less than the more usual cuts. The default
++     is 10. The cut generators identified by "may be slow" at present are just
++     Lift and project and ReduceAndSplit (both versions).
++
++   * Allow initialization of random seed by user. Pseudo-random numbers are
++     used in Cbc and Clp. In Clp they are used to break ties in degenerate
++     problems, while in Cbc heuristics such as the Feasibility Pump use them
++     to decide whether to round up or down. So if a different pseudo-random
++     seed is given to Clp then you may get a different continuous optimum and
++     so different cuts and heuristic solutions. This can be switched on by
++     setting randomSeed for Clp and/or randomCbcSeed for Cbc. The special
++     value of 0 tells code to use time of day for initial seed.
++
++   * Building on this idea, Andrea Lodi, Matteo Fischetti, Michele Monaci,
++     Domenico Salvagnin, Yuji Shinano, and Andrea Tramontani suggest that this
++     idea be improved by running at the root node with multiple copies of
++     solver, each with its own different seed and then passing in the
++     solutions and cuts so that the main solver has a richer set of solutions
++     and possibly stronger cuts. This is switched on by setting
++     -multipleRootPasses. These can also be done in parallel.
++
++   * Few changes to presolve for special variables and badly scaled problems
++     (in CoinUtils).
++
++   * New option -extraVariables <number> which switches on a trivial
++    re-formulation that introduces extra integer variables to group together
++    variables with same cost.
++
++   * For some problems, cut generators and general branching work better if
++     the problem would be infeasible if the cost is too high. If the new
++     option -constraintFromCutoff is set, the objective function is added as a
++     constraint which rhs is set to the current cutoff value (objective value
++     of best known solution).
++
++ * Release 2.7.8:
++
++   * Change message when LP simplex iteration limit is hit from "Exiting on
++     maximum nodes" to "Exiting on maximum number of iterations"
++   * Fix for using overlapping SOS.
++   * Fixes in buildsystem.
++
++ * Release 2.7.7:
++
++   * Fix to report interruption on user event if SIGINT is received by
++     CbcSolver. model->status() should now be 5 if this event happened. Added
++     method CbcModel::sayEventHappened() to make cbc stop due to an 'user
++     event'.
++
++   * Other minor fixes.
++
++ * Release 2.7.6:
++
++   * Fixes to build system.
++
++   * Other minor fixes.
++
++ * Release 2.7.5:
++
++   * Fixes to get AMPL interface working again.
++
++   * More fixes to MSVC++ files.
++
++ * Release 2.7.4:
++
++   * Minor bugfixes.
++
++ * Release 2.7.3:
++
++   * Minor bugfixes.
++
++   * Fixes to MSVC++ files.
++
++ * Release 2.7.2:
++
++   * Allow row/column names for GMPL models.
++
++   * Added CbcModel::haveMultiThreadSupport() to indicate whether Cbc library
++     has been compiled with multithread support.
++
++   * Added CbcModel::waitingForMiniBranchAndBound() to indicate whether
++     sub-MIP heuristic is currently running.
++
++   * Cbc shell should work with readline if configured with
++     ```--enable-gnu-packages```.
++
++   * Support for compressed input files (.gz, .bz2) is now enabled by default.
++
++   * Fix problems with relative gap tolerance > 100% and further bugs.
++
++   * Fixes for MSVC++ Version 9 files.
++
++   * Minor fixes in buildsystem; update to BuildTools 0.7.1.
++
++ * Release 2.7.1:
++
++   * Fixes to MSVC++ files
++
++ * Release 2.7.0:
++
++   * License has been changed to the EPL.
++
++   * Support for MSVC++ version 10 added.
++
++   * Support for BuildTools version 0.7 to incorporate recent enhancements,
++     including proper library versioning in Linux, prohibiting installation of
++     private headers, etc.
++
++   * Updated externals to new stable versions of dependent projects.
++
++   * Improvements to heuristics.
++
++   * New options for cut generation.
++
++   * Improved reporting of results.
++
++   * Improvements to documentation.
++
++   * Minor bug fixes.
++
++
+diff --git a/README.md b/README.md
+index c6024f8..981c9b3 100644
+--- a/README.md
++++ b/README.md
+@@ -1,333 +1,64 @@
+-# CBC Version 2.9.8 README
+-
+-Welcome to the README for the COIN Branch and Cut Solver (CBC). CBC is
+-distributed under the Eclipse Public License and is freely redistributable.
+-All source code and documentation is Copyright IBM and others. This README may
+-be redistributed freely.
+-
+-## Current Testing Status
+-
+-[![Build Status](https://travis-ci.org/coin-or/Cbc.svg?branch=master)](https://travis-ci.org/coin-or/Cbc)
+-
+-[![Build status](https://ci.appveyor.com/api/projects/status/l2hwifsxwhswng8y/branch/master?svg=true)](https://ci.appveyor.com/project/tkralphs/cbc/branch/master)
+-
+-## DOWNLOAD
+-
+-[ ![Download](https://api.bintray.com/packages/coin-or/download/Cbc/images/download.svg) ](https://bintray.com/coin-or/download/Cbc/2.9)
+-
+-Binaries for most platforms are available for download from [Bintray](https://bintray.com/coin-or/download/Cbc)
+-
+-## DOCUMENTATION
+-
+-For a quick start guide, please see the INSTALL file in this distribution. A
+-(somehwat outdated) user's manual is available here:
+-
+-http://www.coin-or.org/Cbc
+-
+-More up-to-date automatically generated documentation of the source code can
+-be found here:
+-
+-http://www.coin-or.org/Doxygen/Cbc/
+-
+-Further information can be found here:
+-
+-http://projects.coin-or.org/Cbc
+-
+-## SUPPORT
+-
+-### List Serve
+-
+-CBC users should use the Cbc mailing list. To subscribe, go to 
+-http://list.coin-or.org/mailman/listinfo/cbc
+-
+-### Bug Reports
+-
+-Bug reports should be reported on the CBC development web site at
+-
+-https://projects.coin-or.org/Cbc/newticket
+-
+-## CHANGELOG
+-
+- * Release 2.9.8
+-
+-   * Update to most current releases of dependencies
+-   * Small bug fixes
+-   * Add support for automatic build and test with Travis and Appveyor
+-
+- * Release 2.9.7
+-
+-   * Small bug fixes
+-   * Option to switch to line buffered output
+-
+- * Release 2.9.6
+-
+-   * Small bug fixes
+-
+- * Release 2.9.5
+-
+-   * Small bug fixes
+-
+- * Release 2.9.4
+-
+-   * Small fixes for stability
+-   * Fixes for Doygen documentation generation
+-
+- * Release 2.9.3
+-
+-   * Minor bug fixes
+-
+- * Release 2.9.2
+-
+-   * Fix for proper installation with ```DESTDIR```
+-
+- * Release 2.9.1
+-
+-   * Fix for dependency linking
+-   * Minor bug fixes
+-
+- * Release 2.9.0 
+-
+-   * Introduced specialized branching methods for dealing with "big Ms".
+-   * Introduced new methods for dealing with symmetry (requires installation of [nauty](http://pallini.di.uniroma1.it/))
+-   * Introduction of conflict cuts (off by default, turn on with `-constraint conflict`)
+-
+- * Release 2.8.13
+-
+-   * Improved message handling
+-   * Miscellaneous bug fixes.
+-
+- * Release 2.8.12
+-
+-   * Update for dependencies.
+-
+- * Release 2.8.11
+-
+-   * Major overhaul of C interface
+-   * Fixes to SOS
+-   * Miscellaneous bug fixes
+-
+- * Release 2.8.10
+-
+-   * More changes related to thread safety.
+-   * Fix bug in build system with Visual Studio compiler.
+-   * Miscellaneous bug fixes.
+-
+- * Release 2.8.9
+-
+-   * Attempt to make Cbc thread safe.
+-   * Add parallel examples.
+-   * Add CbcSolverUsefulInfo.
+-   * Bug fixes.
+-
+- * Release 2.8.8
+-
+-   * Added example to show how to use Cbc with installed libraries in MSVC++
+-   * Fixed inconsistency in addition of libCbcSolver to dependencies in
+-     {{{cbc_addlibs.txt}}}.
+-
+- * Release 2.8.7
+-
+-   * Changed so that Doxygen builds LaTex
+-   * Fixes for build system
+-
+- * Release 2.8.6
+-
+-   * Added option to explicitly link dependencies to comply with packaging
+-     requirements on Fedora and Debian, as well as allow building of MinGW
+-     DLLs.
+-
+- * Release 2.8.5
+-
+-   * Minor fixes to build system
+-
+- * Release 2.8.4
+-
+-   * Small bug fixes
+-   * Upgrades to build system
+-
+- * Release 2.8.3:
+-
+-   * Fix for handling SOS.
+-
+- * Release 2.8.2:
+-
+-   * Fixed recognition of Glpk source in main configure.
+-   * Minor bug fixes in CoinUtils, Clp, and Cbc.
+-
+- * Release 2.8.1:
+-
+-   * Minor bug fixes
+-
+- * Release 2.8.0:
+-
+-   * Introduced new secondaryStatus 8 to indicate that solving stopped due to
+-     an iteration limit.
+-   * Solution pool is now accessible via the command line and the CbcMain*
+-     interface.
+-   * New mipstart option to read an initial feasible solution from a file.
+-     Only values for discrete variables need to be provided.
+-
+-   * Added Proximity Search heuristic by Fischetti and Monaci (off by
+-     default): The simplest way to switch it on using stand-alone version is
+-     ```-proximity on```.
+-
+-     Proximity Search is the new "No-Neighborhood Search" 0-1 MIP refinement
+-     heuristic recently proposed by Fischetti and Monaci (2012). The idea is
+-     to define a sub-MIP without additional constraints but with a modified
+-     objective function intended to attract the search in the proximity of the
+-     incumbent. The approach works well for 0-1 MIPs whose solution landscape
+-     is not too irregular (meaning the there is reasonable probability of
+-     finding an improved solution by flipping a small number of binary
+-     variables), in particular when it is applied to the first heuristic
+-     solutions found at the root node.
+-   
+-   * An implementation of Zero-Half-Cuts by Alberto Caprara is now available.
+-     By default, these cuts are off. To use add to your command line
+-     -zerohalfCuts root (or other options) or just -zero. So far, they may
+-     help only on a small subset of problems and may need some tuning.
+-
+-     The implementation of these cuts is described in G. Andreello, A.
+-     Caprara, and M. Fischetti "Embedding Cuts in a Branch and Cut Framework:
+-     a Computational Study with {0,1/2}-Cuts" INFORMS Journal on Computing
+-     19(2), 229-238, 2007 http://dx.doi.org/10.1287/ijoc.1050.0162
+-
+-   * An alternative implementation of a reduce and split cut generator by
+-     Giacomo Nannicini is now available. By default, these cuts are off. To
+-     use add to your command line -reduce2AndSplitCuts root (or other
+-     options).
+-
+-     The implementation of these cuts is described in G. Cornuejols and G.
+-     Nannicini "Practical strategies for generating rank-1 split cuts in
+-     mixed-integer linear programming" Mathematical Programming Computation
+-     3(4), 281-318, 2011 http://dx.doi.org/10.1007/s12532-011-0028-6
+-
+-   * An alternative robust implementation of a Gomory cut generator by Giacomo
+-     Nannicini is now available. By default, these cuts are off. To use add to
+-     your command line -GMI root (or other options).
+-
+-     The implementation of these cuts is described in G. Cornuejols, F.
+-     Margot, and G. Nannicini "On the safety of Gomory cut generators"
+-     http://faculty.sutd.edu.sg/~nannicini/index.php?page=publications
+-
+-   * To encourage the use of some of the more exotic/expensive cut generators
+-     a parameter -slowcutpasses has been added. The idea is that the code does
+-     these cuts just a few times - less than the more usual cuts. The default
+-     is 10. The cut generators identified by "may be slow" at present are just
+-     Lift and project and ReduceAndSplit (both versions).
+-   
+-   * Allow initialization of random seed by user. Pseudo-random numbers are
+-     used in Cbc and Clp. In Clp they are used to break ties in degenerate
+-     problems, while in Cbc heuristics such as the Feasibility Pump use them
+-     to decide whether to round up or down. So if a different pseudo-random
+-     seed is given to Clp then you may get a different continuous optimum and
+-     so different cuts and heuristic solutions. This can be switched on by
+-     setting randomSeed for Clp and/or randomCbcSeed for Cbc. The special
+-     value of 0 tells code to use time of day for initial seed.
+-   
+-   * Building on this idea, Andrea Lodi, Matteo Fischetti, Michele Monaci,
+-     Domenico Salvagnin, Yuji Shinano, and Andrea Tramontani suggest that this
+-     idea be improved by running at the root node with multiple copies of
+-     solver, each with its own different seed and then passing in the
+-     solutions and cuts so that the main solver has a richer set of solutions
+-     and possibly stronger cuts. This is switched on by setting
+-     -multipleRootPasses. These can also be done in parallel.
+- 
+-   * Few changes to presolve for special variables and badly scaled problems
+-     (in CoinUtils).
+-
+-   * New option -extraVariables <number> which switches on a trivial
+-    re-formulation that introduces extra integer variables to group together
+-    variables with same cost.
+-
+-   * For some problems, cut generators and general branching work better if
+-     the problem would be infeasible if the cost is too high. If the new
+-     option -constraintFromCutoff is set, the objective function is added as a
+-     constraint which rhs is set to the current cutoff value (objective value
+-     of best known solution).
+-
+- * Release 2.7.8:
+-
+-   * Change message when LP simplex iteration limit is hit from "Exiting on
+-     maximum nodes" to "Exiting on maximum number of iterations"
+-   * Fix for using overlapping SOS.
+-   * Fixes in buildsystem.
+-
+- * Release 2.7.7:
+-
+-   * Fix to report interruption on user event if SIGINT is received by
+-     CbcSolver. model->status() should now be 5 if this event happened. Added
+-     method CbcModel::sayEventHappened() to make cbc stop due to an 'user
+-     event'.
+-
+-   * Other minor fixes.
+-
+- * Release 2.7.6:
+-
+-   * Fixes to build system.
+-
+-   * Other minor fixes.
+-
+- * Release 2.7.5:
+-
+-   * Fixes to get AMPL interface working again.
+-
+-   * More fixes to MSVC++ files.
+-
+- * Release 2.7.4:
+-
+-   * Minor bugfixes.
+-
+- * Release 2.7.3:
+-
+-   * Minor bugfixes.
+-
+-   * Fixes to MSVC++ files.
+-
+- * Release 2.7.2:
+-
+-   * Allow row/column names for GMPL models.
+-
+-   * Added CbcModel::haveMultiThreadSupport() to indicate whether Cbc library
+-     has been compiled with multithread support.
+-
+-   * Added CbcModel::waitingForMiniBranchAndBound() to indicate whether
+-     sub-MIP heuristic is currently running.
+-
+-   * Cbc shell should work with readline if configured with
+-     ```--enable-gnu-packages```.
+-
+-   * Support for compressed input files (.gz, .bz2) is now enabled by default.
+-
+-   * Fix problems with relative gap tolerance > 100% and further bugs.
+-
+-   * Fixes for MSVC++ Version 9 files.
+-
+-   * Minor fixes in buildsystem; update to BuildTools 0.7.1.
+-
+- * Release 2.7.1:
+-
+-   * Fixes to MSVC++ files
+-
+- * Release 2.7.0:
+-
+-   * License has been changed to the EPL.
+-
+-   * Support for MSVC++ version 10 added.
+-
+-   * Support for BuildTools version 0.7 to incorporate recent enhancements,
+-     including proper library versioning in Linux, prohibiting installation of
+-     private headers, etc.
+-
+-   * Updated externals to new stable versions of dependent projects.
+-
+-   * Improvements to heuristics. 
+-
+-   * New options for cut generation. 
+-
+-   * Improved reporting of results. 
+-
+-   * Improvements to documentation. 
+-
+-   * Minor bug fixes. 
+-
++[![Build Status](https://travis-ci.org/Mizux/Cbc.svg?branch=master)](https://travis-ci.org/Mizux/Cbc)
++[![Build status](https://ci.appveyor.com/api/projects/status/rylt2b8cap2ai0ow?svg=true)](https://ci.appveyor.com/project/Mizux/cbc)
++
++# Introduction
++
++This is test of Coin-or Cbc port to [CMake](https://cmake.org/) C++ Project.
++
++This project should run on Linux, Mac and Windows.
++
++# CMake Dependencies Tree
++This CMake project is composed of several targets with the following dependencies:  
++```
++CoinUtils:
++Osi: CoinUils
++Clp: CoinUtils Osi
++OsiClp: Osi Clp
++ClpSolver: Clp
++Cgl: Osi
++Cbc: Cgl Clp
++OsiCbc: Osi Cbc
++CbcSolver: Cbc
++```
++All dependencies are built in static to have one standalone executable.
++## Project directory layout
++Thus the project layout is as follow:
++```
++.
++├── CMakeLists.txt // meta CMake doing the orchestration
++├── cmake
++├── CoinUtils
++│   └── CMakeLists.txt
++├── Osi
++│   └── CMakeLists.txt
++├── Clp
++│   └── CMakeLists.txt
++├── Cgl
++│   └── CMakeLists.txt
++└── Cbc
++    └── CMakeLists.txt
++```
++
++# C++ Project Build
++To build the C++ project, as usual:
++```sh
++cmake -H. -Bbuild
++cmake --build build
++```
++
++# Contributing
++
++The [CONTRIBUTING.md](./CONTRIBUTING.md) file contains instructions on how to
++file the Contributor License Agreement before sending any pull requests (PRs).
++Of course, if you're new to the project, it's usually best to discuss any
++proposals and reach consensus before sending your first PR.
++
++# License
++
++Apache 2 for all patches otherwise see the LICENSE file for details.
++
++# Disclaimer
++
++This is not an official Google product, it is just patches that happens to be
++owned by Google.
+ 
+diff --git a/appveyor.yml b/appveyor.yml
+index fb104b0..d91721b 100644
+--- a/appveyor.yml
++++ b/appveyor.yml
+@@ -1,49 +1,27 @@
+-platform:
+-  - x64
++version: '{build}'
++shallow_clone: true
++
++platform: x64
++configuration: Debug
+ 
+ environment:
+-  global:
+-    BINTRAY_API:
+-      secure: a9n4jf90wlFCdaYa6fOmYxsF97ur2dnK8Ys3gn5R90JBzTDq6cD2GlEwmmts75mq
+-    BINTRAY_USERNAME: tkralphs
++  MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+   matrix:
+-    - ARCH: win32-msvc9
+-      HOST_ARCH_ARG: --enable-msvc=MD
+-      ADD_PATH: /mingw64/bin
+-    - ARCH: win32-msvc12
+-      HOST_ARCH_ARG: --enable-msvc
+-      ADD_PATH: /mingw64/bin
+-    - ARCH: win32-msvc14
+-      HOST_ARCH_ARG: --enable-msvc
+-      ADD_PATH: /mingw64/bin
+-    - ARCH: x86_64-w64-mingw32
+-      HOST_ARCH_ARG: --host=x86_64-w64-mingw32
+-      ADD_PATH: /mingw64/bin
+-    - ARCH: i686-w64-mingw32
+-      HOST_ARCH_ARG: --host=i686-w64-mingw32
+-      ADD_PATH: /mingw32/bin
++  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
++    CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
++  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
++    CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
++
++matrix:
++  fast_finish: true
+ 
+-install:
+-  - for /f "delims=" %%i in ('C:\msys64\usr\bin\bash -lc "if [ $APPVEYOR_REPO_BRANCH = 'master' ]; then echo 'trunk'; else echo $APPVEYOR_REPO_BRANCH | cut -d "/" -f 2; fi"') do set VERSION=%%i
+-  - echo %VERSION%
+-  - IF %ARCH%==win32-msvc9 (CALL C:\"Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat")
+-  - IF %ARCH%==win32-msvc12 (CALL C:\"Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat")
+-  - IF %ARCH%==win32-msvc14 (CALL C:\"Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat")
+-  - C:\msys64\usr\bin\bash -lc ""
++before_build:
++  - cmake --version
++  - cmake -H. -Bbuild -G "%CMAKE_GENERATOR%"
+ 
+ build_script:
+-  - C:\msys64\usr\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER; git clone https://github.com/coin-or-tools/BuildTools"
+-  - C:\msys64\usr\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER; BuildTools/get.dependencies.sh fetch --no-third-party"
+-  - C:\msys64\usr\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PATH=$ADD_PATH:$PATH; BuildTools/get.dependencies.sh build --build=x86_64-w64-mingw32 $HOST_ARCH_ARG --verbosity=2 --test"
++  - cmake --build build --target ALL_BUILD -- %MSBUILD_FLAGS%
+ 
+-after_build:
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\build\bin
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\build\include
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\build\lib
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\build\share
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\README.md
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\LICENSE
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\INSTALL
+-  - 7z a %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\Cbc\AUTHORS
+-  - curl -T %APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip -utkralphs:%BINTRAY_API% -H "X-Bintray-Publish:1" -H "X-Bintray-Override:1" https://api.bintray.com/content/coin-or/download/%APPVEYOR_PROJECT_NAME%/%VERSION%/%APPVEYOR_PROJECT_NAME%-%VERSION%-%ARCH%.zip
++test_script:
++  - cmake --build build --target RUN_TESTS -- %MSBUILD_FLAGS%
+ 
 diff --git a/cmake/ParseAc.cmake b/cmake/ParseAc.cmake
 new file mode 100644
 index 0000000..e12dcae
