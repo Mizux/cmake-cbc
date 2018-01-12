@@ -12,7 +12,8 @@ This project should run on Linux, Mac and Windows.
 This CMake project is composed of one executable (FooApp)
 with the following dependencies:  
 ```
-Cbc:
+ZLIB:
+Cbc: ZLIB
 FooApp: Cbc
 ```
 All dependencies are built in static to have one standalone executable.
@@ -22,7 +23,10 @@ Thus the project layout is as follow:
  CMakeLists.txt // meta CMake doing the orchestration.
  cmake
  ├── CMakeLists.txt
- ├── Cbc.cmake
+ ├── zlib.CMakeLists.txt
+ ├── cbc.CMakeLists.txt
+ patches
+ ├── zlib.patch
  FooApp
  ├── CMakeLists.txt
  └── src
