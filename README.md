@@ -2,7 +2,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/towef6objrs85mv0/branch/master?svg=true)](https://ci.appveyor.com/project/Mizux/cmake-cbc/branch/master)
 
 # Introduction
-
 This is an integration test of Cbc in a Modern [CMake](https://cmake.org/) C++ Project using
  [ExternalProject](https://cmake.org/cmake/help/latest/module/ExternalProject.html) module.
 
@@ -17,6 +16,7 @@ Cbc: ZLIB
 FooApp: Cbc
 ```
 All dependencies are built in static to have one standalone executable.
+
 ## Project directory layout
 Thus the project layout is as follow:
 ```
@@ -27,6 +27,7 @@ Thus the project layout is as follow:
  ├── cbc.CMakeLists.txt
  patches
  ├── zlib.patch
+ ├── cbc.patch
  FooApp
  ├── CMakeLists.txt
  └── src
@@ -36,29 +37,19 @@ Thus the project layout is as follow:
 # C++ Project Build
 To build the C++ project, as usual:
 ```sh
-cmake -H. -Bbuild
+cmake -H. -Bbuild -DCMAKE_VERBOSE_MAKEFILE=ON
 cmake --build build
-```
-## Build directory layout
-Since we want to use the [CMAKE_BINARY_DIR](https://cmake.org/cmake/help/latest/variable/CMAKE_BINARY_DIR.html) to generate the binary package.  
-We want this layout (tree build --prune -P "*.py|*.so"):
-```
- FooApp
- └── FooApp
 ```
 
 # Contributing
-
 The [CONTRIBUTING.md](./CONTRIBUTING.md) file contains instructions on how to
 file the Contributor License Agreement before sending any pull requests (PRs).
 Of course, if you're new to the project, it's usually best to discuss any
 proposals and reach consensus before sending your first PR.
 
 # License
-
 Apache 2. See the LICENSE file for details.
 
 # Disclaimer
-
 This is not an official Google product, it is just code that happens to be
 owned by Google.
