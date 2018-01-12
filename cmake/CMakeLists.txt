@@ -10,6 +10,7 @@ set(_SKIP_INSTALL ${CMAKE_SKIP_INSTALL_RULES})
 ############
 ##  ZLIB  ##
 ############
+message(STATUS "Subproject: ZLIB...")
 # Download and unpack zlib at configure time
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/zlib.CMakeLists.txt
@@ -31,10 +32,12 @@ add_subdirectory(
 	${CMAKE_BINARY_DIR}/zlib-src
 	${CMAKE_BINARY_DIR}/zlib-build
 	EXCLUDE_FROM_ALL)
+message(STATUS "Subproject: ZLIB...DONE")
 
-###########
-##  CBC  ##
-###########
+###################
+##  COIN-OR:CBC  ##
+###################
+message(STATUS "Subproject: COIN-OR:Cbc...")
 # Download and unpack cbc at configure time
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/cbc.CMakeLists.txt
@@ -56,5 +59,6 @@ add_subdirectory(
 	${CMAKE_BINARY_DIR}/cbc-src
 	${CMAKE_BINARY_DIR}/cbc-build
 	EXCLUDE_FROM_ALL)
+message(STATUS "Subproject: COIN-OR:Cbc...DONE")
 
 set(CMAKE_SKIP_INSTALL_RULES ${_SKIP_INSTALL})
