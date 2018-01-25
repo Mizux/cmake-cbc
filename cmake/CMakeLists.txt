@@ -1,11 +1,6 @@
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_TESTING OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Backup the value of CMAKE_SKIP_INSTALL_RULES
-set(_SKIP_INSTALL ${CMAKE_SKIP_INSTALL_RULES})
-# TODO Keep install rules of dependencies (and adapt them if needed)
-#set(CMAKE_SKIP_INSTALL_RULES TRUE)
 
 ############
 ##  ZLIB  ##
@@ -30,8 +25,7 @@ endif()
 
 add_subdirectory(
 	${CMAKE_BINARY_DIR}/zlib-src
-	${CMAKE_BINARY_DIR}/zlib-build
-	EXCLUDE_FROM_ALL)
+	${CMAKE_BINARY_DIR}/zlib-build)
 message(STATUS "Subproject: ZLIB...DONE")
 
 ###################
@@ -57,8 +51,5 @@ endif()
 
 add_subdirectory(
 	${CMAKE_BINARY_DIR}/cbc-src
-	${CMAKE_BINARY_DIR}/cbc-build
-	EXCLUDE_FROM_ALL)
+	${CMAKE_BINARY_DIR}/cbc-build)
 message(STATUS "Subproject: COIN-OR:Cbc...DONE")
-
-set(CMAKE_SKIP_INSTALL_RULES ${_SKIP_INSTALL})
