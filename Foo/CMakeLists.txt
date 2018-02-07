@@ -23,13 +23,13 @@ elseif(UNIX)
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	Cbc::OsiCbc	Cbc::CbcSolver
-	Clp::OsiClp	Clp::ClpSolver
+	Cbc::OsiClp	Cbc::ClpSolver
 	)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(CMakeCbc::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 # Install
-install(TARGETS	Foo
-	EXPORT FooTargets
+install(TARGETS	${PROJECT_NAME}
+	EXPORT CMakeCbcTargets
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foo
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

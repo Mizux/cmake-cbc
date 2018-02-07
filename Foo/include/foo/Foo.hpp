@@ -1,7 +1,7 @@
 #pragma once
 
 namespace foo {
-  void helloWorld();
+	void helloWorld();
 
 	class Foo {
 		public:

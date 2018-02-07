@@ -49,22 +49,22 @@ add_subdirectory(Foo)
 add_subdirectory(FooApp)
 
 # Install
-install(EXPORT FooTargets
-	NAMESPACE Foo::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Foo
+install(EXPORT CMakeCbcTargets
+	NAMESPACE CMakeCbc::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CMakeCbc
 	COMPONENT Devel)
 include(CMakePackageConfigHelpers)
-configure_package_config_file(FooConfig.cmake.in
-	"${PROJECT_BINARY_DIR}/FooConfig.cmake"
-	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Foo"
+configure_package_config_file(cmake/CMakeCbcConfig.cmake.in
+	"${PROJECT_BINARY_DIR}/CMakeCbcConfig.cmake"
+	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CMakeCbc"
 	NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 write_basic_package_version_file(
-	"${PROJECT_BINARY_DIR}/FooConfigVersion.cmake"
+	"${PROJECT_BINARY_DIR}/CMakeCbcConfigVersion.cmake"
 	COMPATIBILITY SameMajorVersion)
 install(
 	FILES
-	"${PROJECT_BINARY_DIR}/FooConfig.cmake"
-	"${PROJECT_BINARY_DIR}/FooConfigVersion.cmake"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Foo"
+	"${PROJECT_BINARY_DIR}/CMakeCbcConfig.cmake"
+	"${PROJECT_BINARY_DIR}/CMakeCbcConfigVersion.cmake"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CMakeCbc"
 	COMPONENT Devel)

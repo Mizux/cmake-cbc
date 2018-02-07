@@ -16,7 +16,7 @@ elseif(UNIX)
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	Cbc::OsiCbc	Cbc::CbcSolver
-	Clp::OsiClp	Clp::ClpSolver
+	Cbc::OsiClp	Cbc::ClpSolver
 	)
 add_executable(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
@@ -27,7 +27,7 @@ if(BUILD_TESTING)
 endif()
 
 # Install
-install(TARGETS	FooApp
-	EXPORT FooTargets
+install(TARGETS	${PROJECT_NAME}
+	EXPORT CMakeCbcTargets
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	)
