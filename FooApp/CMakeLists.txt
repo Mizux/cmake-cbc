@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	Cbc::OsiCbc	Cbc::CbcSolver
 	Cbc::OsiClp	Cbc::ClpSolver
 	)
-add_executable(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_executable(CMakeCbc::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 # Test
 include(CTest)
